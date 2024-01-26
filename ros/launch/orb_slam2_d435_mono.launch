@@ -46,4 +46,6 @@
       <param name="camera_p2" type="double" value="0.0" />
       <param name="camera_k3" type="double" value="0.0" />
   </node>
+
+  <node name="Localize" pkg="orb_slam2_ros" type="Localize" output="screen"/>
 </launch>

@@ -2,17 +2,17 @@
   <node name="orb_slam2_rgbd" pkg="orb_slam2_ros"
       type="orb_slam2_ros_rgbd" output="screen">
 
-       <remap from="/camera/rgb/image_raw" to="/camera/rgb/image_rect_color" />
-       <remap from="/camera/depth_registered/image_raw" to="/camera/depth_registered/sw_registered/image_rect" />
+       <remap from="/camera/rgb/image_raw" to="/camera/rgb/image_raw" />
+       <remap from="/camera/depth_registered/image_raw" to="/camera/depth/image_raw" />
 
        <param name="publish_pointcloud" type="bool" value="true" />
        <param name="publish_pose" type="bool" value="true" />
-       <param name="localize_only" type="bool" value="false" />
+       <param name="localize_only" type="bool" value="true" />
        <param name="reset_map" type="bool" value="false" />
 
        <!-- static parameters -->
-       <param name="load_map" type="bool" value="false" />
-       <param name="map_file" type="string" value="map.bin" />
+       <param name="load_map" type="bool" value="true" />
+       <param name="map_file" type="string" value="myEnv2.bin" />
        <param name="voc_file" type="string" value="$(find orb_slam2_ros)/orb_slam2/Vocabulary/ORBvoc.txt" />
 
        <param name="pointcloud_frame_id" type="string" value="map" />
@@ -38,7 +38,7 @@
 
         <!-- Camera calibration parameters -->
         <!--If the node should wait for a camera_info topic to take the camera calibration data-->
-       <param name="load_calibration_from_cam" type="bool" value="false" />
+       <param name="load_calibration_from_cam" type="bool" value="true" />
        <!-- Camera calibration and distortion parameters (OpenCV) -->
       <param name="camera_fx" type="double" value="632.7927856445312" />
       <param name="camera_fy" type="double" value="626.8605346679688" />
@@ -52,4 +52,7 @@
       <!-- IR projector baseline times fx (aprox.) -->
       <param name="camera_baseline" type="double" value="37.2925" />
   </node>
+
+<node name="Localize" pkg="orb_slam2_ros" type="Localize"/>
+
 </launch>

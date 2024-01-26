@@ -131,6 +131,7 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
         else
             mDepthMapFactor = 1.0f/mDepthMapFactor;
     }
+    
 
 }
 
@@ -388,6 +389,12 @@ void Tracking::Track()
             // the camera we will use the local map again.
             if(bOK && !mbVO)
                 bOK = TrackLocalMap();
+            
+            else{
+                std_msgs::Int16 data;
+                data.data = 0;
+                pub.publish(data);
+            }
         }
 
         if(bOK)
@@ -1181,12 +1188,15 @@ void Tracking::UpdateLocalMap()
     // Update
     UpdateLocalKeyFrames();
     UpdateLocalPoints();
+    //cout << "mvpLocalMapPoints: " << int(mvpLocalMapPoints.size()) << endl;
+    std_msgs::Int16 data;
+    data.data = int(mvpLocalMapPoints.size());
+    pub.publish(data);
 }
 
 void Tracking::UpdateLocalPoints()
-{
+{   
     mvpLocalMapPoints.clear();
-
     for(vector<KeyFrame*>::const_iterator itKF=mvpLocalKeyFrames.begin(), itEndKF=mvpLocalKeyFrames.end(); itKF!=itEndKF; itKF++)
     {
         KeyFrame* pKF = *itKF;

@@ -28,7 +28,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/CameraInfo.h>
-
+#include <std_msgs/Int16.h>
 
 #include"FrameDrawer.h"
 #include"Map.h"
@@ -40,6 +40,8 @@
 #include"ORBextractor.h"
 #include "Initializer.h"
 #include "System.h"
+#include <typeinfo>
+#include <iostream>
 
 #include <mutex>
 
@@ -126,6 +128,9 @@ public:
     bool mbOnlyTracking;
 
     void Reset();
+
+    ros::NodeHandle nh;
+    ros::Publisher pub = nh.advertise<std_msgs::Int16>("featureLevel",1);
 
 protected:
 

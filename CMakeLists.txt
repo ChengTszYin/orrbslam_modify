@@ -28,6 +28,8 @@ tf2_ros
 sensor_msgs
 dynamic_reconfigure
 message_generation
+std_srvs
+geometry_msgs
 )
 
 find_package(OpenCV 4.0 QUIET)
@@ -78,7 +80,7 @@ generate_messages(
 )
 
 catkin_package (
-  CATKIN_DEPENDS roscpp rospy std_msgs cv_bridge image_transport tf sensor_msgs dynamic_reconfigure message_runtime
+  CATKIN_DEPENDS roscpp rospy std_msgs cv_bridge image_transport tf sensor_msgs std_srvs dynamic_reconfigure message_runtime
   LIBRARIES {PROJECT_NAME} libDBoW2 libg2o
 )
 
@@ -158,30 +160,34 @@ target_link_libraries(${PROJECT_NAME}_rgbd
 ${LIBS_ROS}
 )
 
-install(TARGETS ${PROJECT_NAME}_mono ${PROJECT_NAME}_stereo ${PROJECT_NAME}_rgbd
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+add_executable(Localize ros/src/Localize.cpp)
+add_dependencies(Localize ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(Localize ${catkin_LIBRARIES})
 
-install(TARGETS ${PROJECT_NAME} DBoW2 g2o
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+# install(TARGETS ${PROJECT_NAME}_mono ${PROJECT_NAME}_stereo ${PROJECT_NAME}_rgbd
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 
-install(DIRECTORY ros/launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch
-)
+# install(TARGETS ${PROJECT_NAME} DBoW2 g2o
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 
-install(DIRECTORY ros/config/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/config
-)
+# install(DIRECTORY ros/launch/
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/launch
+# )
 
-install(DIRECTORY orb_slam2/config/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/orb_slam2/config
-)
+# install(DIRECTORY ros/config/
+#         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/ros/config
+# )
 
-install(DIRECTORY orb_slam2/Vocabulary/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/orb_slam2/Vocabulary
-)
+# install(DIRECTORY orb_slam2/config/
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/orb_slam2/config
+# )
+
+# install(DIRECTORY orb_slam2/Vocabulary/
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/orb_slam2/Vocabulary
+# )

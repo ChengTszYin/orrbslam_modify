@@ -40,8 +40,6 @@ void Node::Init () {
 
   service_server_ = node_handle_.advertiseService(name_of_node_+"/save_map", &Node::SaveMapSrv, this);
 
-  relocal_server_ = node_handle_.advertiseService("orb_servicew", &Node::LocalizeToggle,this);
-
   //Setup dynamic reconfigure
   dynamic_reconfigure::Server<orb_slam2_ros::dynamic_reconfigureConfig>::CallbackType dynamic_param_callback;
   dynamic_param_callback = boost::bind(&Node::ParamsChangedCallback, this, _1, _2);
@@ -58,8 +56,7 @@ void Node::Init () {
 
   // Enable publishing camera's pose as PoseStamped message
   if (publish_pose_param_) {
-    pose_publisher_ = node_handle_.advertise<geometry_msgs::PoseStamped> ("orb_slam2_pose", 1);
-    pose_publisher_ToRviz = node_handle_.advertise<geometry_msgs::PoseWithCovarianceStamped> ("testing_orb_slam2_pose",1);
+    pose_publisher_ = node_handle_.advertise<geometry_msgs::PoseStamped> (name_of_node_+"/pose", 1);
   }
 
   status_gba_publisher_ = node_handle_.advertise<std_msgs::Bool> (name_of_node_+"/gba_running", 1);
@@ -71,21 +68,11 @@ void Node::Update () {
 
   if (!position.empty()) {
     if (publish_tf_param_){
-      //PublishPositionAsTransform(position);
-      std::cout << "disable" << std::endl;
+      PublishPositionAsTransform(position);
     }
 
     if (publish_pose_param_) {
-      if(localCallback_)
-	{
-         PublishPositionAsPoseStampedToRviz(position);
-	 localCallback_ = false;
-	std::cout << "relocal end" << std::endl;
-	}
-       else
-	{
-	  PublishPositionAsPoseStamped(position);
-	}
+      PublishPositionAsPoseStamped(position);
     }
   }
 
@@ -191,28 +178,6 @@ void Node::PublishPositionAsPoseStamped (cv::Mat position) {
   pose_publisher_.publish(pose_msg);
 }
 
-void Node::PublishPositionAsPoseStampedToRviz (cv::Mat position) {
-  tf2::Transform tf_position = TransformFromMat(position);
-
-  // Make transform from camera frame to target frame
-  tf2::Transform tf_position_target = TransformToTarget(tf_position, camera_frame_id_param_, target_frame_id_param_);
-  
-  // Make message
-  tf2::Stamped<tf2::Transform> tf_position_target_stamped;
-  tf_position_target_stamped = tf2::Stamped<tf2::Transform>(tf_position_target, current_frame_time_, map_frame_id_param_);
-  //geometry_msgs::PoseStamped pose_msg;
-  geometry_msgs::PoseWithCovarianceStamped pose_msg;
-  pose_msg.header.stamp = ros::Time::now();
-  pose_msg.header.frame_id = "map";
-  tf2::toMsg(tf_position_target_stamped, pose_msg.pose.pose);
-  tf::Quaternion quat;
-  tf::quaternionMsgToTF(pose_msg.pose.pose.orientation, quat);
-  double roll, pitch, yaw;
-  tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-  ROS_INFO("angle: %f, position X: %f, position Y: %f", tf_position_target_stamped,yaw, pose_msg.pose.pose.position.x,pose_msg.pose.pose.position.y);
-  pose_publisher_ToRviz.publish(pose_msg);
-}
-
 void Node::PublishGBAStatus (bool gba_status) {
   std_msgs::Bool gba_status_msg;
   gba_status_msg.data = gba_status;
@@ -268,6 +233,7 @@ sensor_msgs::PointCloud2 Node::MapPointsToPointCloud (std::vector<ORB_SLAM2::Map
   if (map_points.size() == 0) {
     std::cout << "Map point vector is empty!" << std::endl;
   }
+
   sensor_msgs::PointCloud2 cloud;
 
   const int num_channels = 3; // x y z
@@ -333,13 +299,6 @@ bool Node::SaveMapSrv (orb_slam2_ros::SaveMap::Request &req, orb_slam2_ros::Save
   }
 
   return res.success;
-}
-
-bool Node::LocalizeToggle(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)
-{
-  localCallback_ = true;
-  cout << "Relocation executing" << endl;
-  return true;
 }
 
 
